@@ -1,0 +1,138 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+  <style>
+    .simple-keyboard-input {
+      /* line-height: 18px; */
+      font-size: 16pt;
+      display: block;
+      width: 100%;
+    }
+    .nextLetter {
+      background: #f00 !important;
+      box-shadow: 0px 0px 40px 5px rgba(255, 255, 0, 0.5) !important;
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <input class="simple-keyboard-input" placeholder="Tap on the virtual keyboard to start" />
+  <div class="simple-keyboard"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+  <script type="text/javascript">
+    let Keyboard = window.SimpleKeyboard.default;
+
+    const layouts = {
+      default: [
+        '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+        '{tab} q w e r t y u i o p [ ] \\',
+        '{lock} a s d f g h j k l ; \' {enter}',
+        '{shiftleft} z x c v b n m , . / {shiftright}',
+        '.com @ {space}'
+      ],
+      defaultShift: [
+        '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
+        '{tab} Q W E R T Y U I O P { } |',
+        '{lock} A S D F G H J K L : " {enter}',
+        '{shiftleft} Z X C V B N M < > ? {shiftright}',
+        '.com @ {space}'
+      ],
+      colemak: [
+        '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+        '{tab} q w f p g j l u y ; [ ] \\',
+        '{lock} a r s t d h n e i o \' {enter}',
+        '{shiftleft} z x c v b k m , . / {shiftright}',
+        '{space}'
+      ],
+      colemakShift: [
+        '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
+        '{tab} Q W F P G J L U Y : { } |',
+        '{lock} A R S T D H N E I O " {enter}',
+        '{shiftleft} Z X C V B K M < > ? {shiftright}',
+        '{space}'
+      ]
+    };
+
+    const inputBox = document.querySelector(".simple-keyboard-input");
+    let myKeyboard = new Keyboard({
+      layout: layouts,
+      layoutName: 'colemak',
+      mergeDisplay: true,
+      display: {
+        '{bksp}': 'Backspace',
+        '{lock}': 'Caps Lock',
+        '{tab}': 'Tab',
+        '{shift}': 'Shift',
+        '{shiftleft}': 'Shift',
+        '{shiftright}': 'Shift',
+        '{space}': 'Space',
+        '{enter}': 'Enter',
+      },
+
+      onChange: input => onChange(input),
+      onKeyPress: button => onKeyPress(button),
+      onInit: () => {
+        inputBox.focus();
+      },
+
+      physicalKeyboardHighlight: true,
+      physicalKeyboardHighlightTextColor: "green",
+      physicalKeyboardHighlightBgColor: "#9ab4d0",
+
+      debug: true,
+    });
+
+    const interval = 3000;
+    const on = () => {
+      setTimeout(() => {
+        myKeyboard.addButtonTheme("a", "nextLetter");
+        off();
+      }, interval);
+    };
+    const off = () => {
+      setTimeout(() => {
+        myKeyboard.removeButtonTheme("a", "nextLetter");
+        on();
+      }, interval);
+    };
+    on();
+
+    function onChange(input) {
+      inputBox.value = input;
+      console.log("Input changed", input);
+    }
+
+    function onKeyPress(button) {
+      console.log("Button Pressed", button);
+      inputBox.focus();
+      if (button === "{shiftleft}" || button === "{shiftright}" || button === "{capslock}") handleShift();
+    }
+
+    function handleShift() {
+      let currentLayout = myKeyboard.options.layoutName;
+      let shiftToggle = currentLayout.endsWith('Shift') ? currentLayout.substring(0, currentLayout.length - 5) :
+        currentLayout + "Shift";
+
+      console.log(shiftToggle);
+
+      myKeyboard.setOptions({
+        layoutName: shiftToggle
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+      }
+    });
+    inputBox.addEventListener("change", event => {
+      myKeyboard.setInput(event.target.value);
+    });
+    inputBox.addEventListener('blur', event => inputBox.focus());
+  </script>
+</body>
+
+</html>
